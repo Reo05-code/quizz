@@ -1,0 +1,53 @@
+source "https://rubygems.org"
+git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+
+ruby "3.2.2"
+
+# Rails本体
+gem "rails", "~> 7.0.7", ">= 7.0.7.2"
+
+# データベース
+gem "pg", "~> 1.1"
+
+# APIサーバー
+gem "puma", "~> 5.0"
+
+# CORS設定（フロントエンドとの通信用）
+gem "rack-cors"
+
+# JSONシリアライザ
+gem "jsonapi-serializer"
+
+# 環境変数管理
+gem "dotenv-rails"
+
+# タイムゾーン情報
+gem "tzinfo-data", platforms: %i[ mingw mswin x64_mingw jruby ]
+
+# パフォーマンス向上
+gem "bootsnap", require: false
+
+group :development, :test do
+  # デバッグツール
+  gem "debug", platforms: %i[ mri mingw x64_mingw ]
+
+  # コード品質チェック
+  gem "rubocop", require: false
+  gem "rubocop-rails", require: false
+  gem "rubocop-performance", require: false
+
+  # テストフレームワーク（任意）
+  gem "rspec-rails", "~> 6.0"
+  gem "factory_bot_rails"
+end
+
+group :development do
+  # 開発用
+  gem "spring"
+end
+
+group :test do
+  # テストツール
+  gem "shoulda-matchers", "~> 5.0"
+  gem "faker"
+end

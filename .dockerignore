@@ -1,0 +1,25 @@
+# Git
+.git
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+# ドキュメント
+README.md
+LICENSE
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# 環境変数
+.env
+.env.local
+
+# ログ
+*.log
