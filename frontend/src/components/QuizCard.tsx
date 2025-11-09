@@ -9,7 +9,7 @@ interface QuizCardProps {
 
 const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
   return (
-    <Link to={`/quizzes/${quiz.id}`} className="block">
+    <Link to={`/quizzes/${quiz.id}/questions`} className="block">
       <div
         className="bg-blue-500 border-4 border-blue-400 rounded-xl p-5 shadow-lg transform hover:scale-105 hover:shadow-2xl transition-all duration-300 ease-in-out"
       >
@@ -18,6 +18,4 @@ const QuizCard: React.FC<QuizCardProps> = ({ quiz }) => {
       </div>
     </Link>
   );
-};
-
-export default QuizCard;
+};export default QuizCard;
