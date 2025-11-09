@@ -4,5 +4,4 @@ class Question < ApplicationRecord
   has_many :choices, dependent: :destroy
 
   validates :content, presence: true
-  validates :quiz_id, presence: true
 end

@@ -5,6 +5,5 @@ class Choice < ApplicationRecord
   has_many :challengers, through: :answers
 
   validates :content, presence: true
-  validates :question_id, presence: true
   validates :correct_answer, inclusion: { in: [true, false] }
 end

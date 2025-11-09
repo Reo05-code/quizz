@@ -2,11 +2,11 @@
 module Api
   module V1
     class ChallengersController < ApplicationController
-      before_action :set_challenger, only: [:show, :update, :destroy]
+      before_action :set_challenger, only: %i[show update destroy]
 
       # GET /api/v1/challengers
       def index
-        @challengers = Challenger.all.order(score: :desc)
+        @challengers = Challenger.order(score: :desc)
         render json: @challengers
       end
 

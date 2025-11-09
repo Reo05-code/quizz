@@ -2,11 +2,11 @@
 module Api
   module V1
     class QuizzesController < ApplicationController
-      before_action :set_quiz, only: [:show, :update, :destroy]
+      before_action :set_quiz, only: %i[show update destroy]
 
       # GET /api/v1/quizzes
       def index
-        @quizzes = Quiz.all.order(created_at: :desc)
+        @quizzes = Quiz.order(created_at: :desc)
         render json: @quizzes
       end
 

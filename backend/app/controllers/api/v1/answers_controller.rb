@@ -2,7 +2,7 @@
 module Api
   module V1
     class AnswersController < ApplicationController
-      before_action :set_challenger, only: [:index, :create]
+      before_action :set_challenger, only: %i[index create]
       before_action :set_answer, only: [:destroy]
 
       # GET /api/v1/challengers/:challenger_id/answers
@@ -18,7 +18,8 @@ module Api
         if @answer.save
           # スコアを更新（正解の場合は+10点）
           if @answer.choice.correct_answer
-            @challenger.increment!(:score, 10)
+            @challenger.score += 10
+            @challenger.save
           end
           render json: @answer, status: :created
         else

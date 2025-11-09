@@ -7,6 +7,7 @@ Rails.application.configure do
     'Cache-Control' => "public, max-age=#{1.hour.to_i}"
   }
   config.action_controller.perform_caching = false
-  config.action_mailer.perform_caching = false
   config.active_support.deprecation = :stderr
+  config.active_support.disallowed_deprecation = :raise
+  config.active_support.disallowed_deprecation_warnings = []
 end

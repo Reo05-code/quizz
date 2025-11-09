@@ -3,7 +3,7 @@ module Api
   module V1
     class QuestionsController < ApplicationController
       before_action :set_quiz
-      before_action :set_question, only: [:show, :update, :destroy]
+      before_action :set_question, only: %i[show update destroy]
 
       # GET /api/v1/quizzes/:quiz_id/questions
       def index

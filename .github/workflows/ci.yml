@@ -1,0 +1,170 @@
+# GitHub Actions CI/CD設定
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  # バックエンド（Rails）のテスト
+  backend-test:
+    name: Backend Tests (Rails)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: quiz_app_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.2
+          bundler-cache: true
+          working-directory: ./backend
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: bundle install
+
+      - name: Set up database
+        working-directory: ./backend
+        env:
+          RAILS_ENV: test
+          DATABASE_HOST: localhost
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: password
+          DATABASE_NAME: quiz_app_test
+        run: |
+          bundle exec rails db:create
+          bundle exec rails db:schema:load
+
+      - name: Run tests
+        working-directory: ./backend
+        env:
+          RAILS_ENV: test
+          DATABASE_HOST: localhost
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: password
+          DATABASE_NAME: quiz_app_test
+        run: bundle exec rspec
+
+  # バックエンドのLint（RuboCop）
+  backend-lint:
+    name: Backend Lint (RuboCop)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.2.2
+          bundler-cache: true
+          working-directory: ./backend
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: bundle install
+
+      - name: Run RuboCop
+        working-directory: ./backend
+        run: bundle exec rubocop
+
+  # フロントエンド（React）のテスト
+  frontend-test:
+    name: Frontend Tests (React)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run tests
+        working-directory: ./frontend
+        run: npm test --if-present
+
+      - name: Build
+        working-directory: ./frontend
+        run: npm run build
+
+  # フロントエンドのLint（ESLint）
+  frontend-lint:
+    name: Frontend Lint (ESLint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Run Prettier check
+        working-directory: ./frontend
+        run: npm run format -- --check
+
+  # TypeScript型チェック
+  frontend-typecheck:
+    name: Frontend Type Check (TypeScript)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run TypeScript check
+        working-directory: ./frontend
+        run: npm run type-check
