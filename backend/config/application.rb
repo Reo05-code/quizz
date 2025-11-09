@@ -16,14 +16,32 @@ module QuizApp
     config.load_defaults 7.0
     config.api_only = true
 
-    # CORS設定
+    # CORS設定（開発環境用）
     config.middleware.insert_before 0, Rack::Cors do
       allow do
-        origins '*'
-        resource '*',
+        # 開発環境のフロントエンドURL
+        origins ENV.fetch('FRONTEND_URL', 'http://localhost:5173'),
+                'http://localhost:3000',
+                'http://127.0.0.1:5173',
+                'http://127.0.0.1:3000'
+
+        resource '/api/*',
           headers: :any,
-          methods: [:get, :post, :put, :patch, :delete, :options, :head]
+          methods: [:get, :post, :put, :patch, :delete, :options, :head],
+          credentials: true,
+          max_age: 600
+      end
+
+      # ヘルスチェックエンドポイント
+      allow do
+        origins '*'
+        resource '/health',
+          headers: :any,
+          methods: [:get, :head]
       end
     end
+
+    # JSON APIのデフォルト設定
+    config.middleware.use ActionDispatch::ContentSecurityPolicy::Middleware
   end
 end
