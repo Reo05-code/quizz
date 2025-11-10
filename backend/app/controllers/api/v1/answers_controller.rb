@@ -13,17 +13,19 @@ module Api
 
       # POST /api/v1/challengers/:challenger_id/answers
       def create
-        @answer = @challenger.answers.new(answer_params)
+        challenger = Challenger.find(params[:challenger_id])
+        answer = challenger.answers.build(answer_params)
+        choice = Choice.find(answer_params[:choice_id])
 
-        if @answer.save
-          # スコアを更新（正解の場合は+10点）
-          if @answer.choice.correct_answer
-            @challenger.score += 10
-            @challenger.save
+        if answer.save
+          if choice.correct_answer
+            challenger.increment!(:score, 10)
+            render json: { answer: answer, correct: true, score: challenger.score }, status: :created
+          else
+            render json: { answer: answer, correct: false, score: challenger.score }, status: :created
           end
-          render json: @answer, status: :created
         else
-          render json: { errors: @answer.errors.full_messages }, status: :unprocessable_entity
+          render json: answer.errors, status: :unprocessable_entity
         end
       end
 

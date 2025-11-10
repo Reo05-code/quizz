@@ -13,6 +13,9 @@ Rails.application.routes.draw do
       end
 
       resources :challengers do
+        collection do
+          get 'ranking'
+        end
         resources :answers, only: [:index, :create, :destroy]
       end
 

@@ -1,13 +1,13 @@
-// frontend/src/pages/Questions.tsx
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Question, Challenger } from '../types';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Question, Challenger, AnswerHistoryItem } from '../types';
 import { apiClient } from '../lib/apiClient';
 import QuestionCard from '../components/QuestionCard';
 import ChoiceButton from '../components/ChoiceButton';
 
 const Questions: React.FC = () => {
   const { id: quizId } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [challenger, setChallenger] = useState<Challenger | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -15,19 +15,20 @@ const Questions: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [answerResult, setAnswerResult] = useState<'correct' | 'incorrect' | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const [score, setScore] = useState(0);
+  const [answerHistory, setAnswerHistory] = useState<AnswerHistoryItem[]>([]);
 
   useEffect(() => {
     if (!quizId) return;
 
     const startQuiz = async () => {
       try {
-        // 1. 挑戦者を作成
+        setLoading(true);
         const challengerResponse = await apiClient.post('/challengers', {
-          challenger: { name: 'ゲスト' }, // 仮の挑戦者名
+          challenger: { name: 'ゲスト' },
         });
         setChallenger(challengerResponse.data);
 
-        // 2. 問題を取得
         const questionsResponse = await apiClient.get(`/quizzes/${quizId}/questions`);
         setQuestions(questionsResponse.data);
       } catch (err) {
@@ -42,7 +43,7 @@ const Questions: React.FC = () => {
   }, [quizId]);
 
   const handleSelectChoice = async (choiceId: number) => {
-    if (!challenger) return;
+    if (!challenger || isAnswered) return;
     setIsAnswered(true);
 
     try {
@@ -50,18 +51,16 @@ const Questions: React.FC = () => {
         answer: { choice_id: choiceId },
       });
 
-      // APIレスポンスから正解かどうかを判断
-      const createdAnswer = response.data;
+      const { correct, score: newScore } = response.data;
+      setScore(newScore);
+      setAnswerResult(correct ? 'correct' : 'incorrect');
 
-      // HACK: 本来はanswers#createのレスポンスに正解情報を含めるべき
-      // 今回は簡単のため、再度choiceを取得して判定
-      const choice = currentQuestion.choices.find(c => c.id === createdAnswer.choice_id);
-
-      if (choice?.correct_answer) {
-        setAnswerResult('correct');
-      } else {
-        setAnswerResult('incorrect');
-      }
+      const newHistoryItem: AnswerHistoryItem = {
+        questionNumber: currentIndex + 1,
+        questionText: questions[currentIndex].content,
+        isCorrect: correct,
+      };
+      setAnswerHistory([...answerHistory, newHistoryItem]);
     } catch (err) {
       setError('回答の送信に失敗しました。');
       console.error(err);
@@ -74,8 +73,7 @@ const Questions: React.FC = () => {
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      alert('クイズ終了です！お疲れ様でした。');
-      // ここで結果画面へ遷移
+      navigate('/result', { state: { score, answerHistory } });
     }
   };
 
@@ -95,6 +93,9 @@ const Questions: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="w-full max-w-2xl mb-4 text-right">
+        <span className="text-2xl font-bold text-yellow-400">SCORE: {score}</span>
+      </div>
       <div className="relative w-full max-w-2xl">
         {answerResult && (
           <div className="absolute inset-0 bg-black bg-opacity-75 flex justify-center items-center z-10 rounded-lg">

@@ -15,6 +15,12 @@ module Api
         render json: @challenger, include: { answers: { include: :choice } }
       end
 
+      # GET /api/v1/challengers/ranking
+      def ranking
+        @challengers = Challenger.order(score: :desc).limit(10) # 上位10件を取得
+        render json: @challengers
+      end
+
       # POST /api/v1/challengers
       def create
         @challenger = Challenger.new(challenger_params)
