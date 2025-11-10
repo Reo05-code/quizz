@@ -7,8 +7,20 @@ export interface Quiz {
   updated_at: string;
 }
 
+export interface Choice {
+  id: number;
+  content: string;
+  correct_answer: boolean;
+}
+
 export interface Question {
   id: number;
   content: string;
-  // 必要に応じて他のプロパティ（choicesなど）も追加
+  choices: Choice[];
+}
+
+export interface Challenger {
+  id: number;
+  name: string;
+  score: number;
 }
